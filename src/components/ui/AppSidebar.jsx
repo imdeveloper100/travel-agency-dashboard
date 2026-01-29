@@ -25,7 +25,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "./Sidebar"
 import { Ticket } from "lucide-react"
 import { NavMain } from "./NavMain"
 import { NavUser } from "./NavUser"

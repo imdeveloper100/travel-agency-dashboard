@@ -1,7 +1,7 @@
 import { IconBell, IconCirclePlusFilled } from "@tabler/icons-react"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Button } from "./Button"
+import { Separator } from "./Separator"
+import { SidebarTrigger } from "./Sidebar"
 import PrimaryButton from "./PrimaryButton"
 import { useNavigate } from "react-router-dom"
 

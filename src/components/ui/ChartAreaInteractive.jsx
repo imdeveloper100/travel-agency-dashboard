@@ -4,8 +4,8 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart"
-import { Button } from "@/components/ui/button"
+} from "./Chart"
+import { Button } from "./Button"
 
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
