@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from '../Table'
-import { Pagination } from './pagination'
+import { Pagination } from './Pagination'
 import { cn } from '@/lib/utils'
 
 const ReusableTable = React.forwardRef((props, ref) => {
