@@ -2,7 +2,7 @@ import React from 'react'
 import {
   X,
 } from 'lucide-react'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Checkbox } from '../Checkbox'
 
 
 const AIRLINES = [
