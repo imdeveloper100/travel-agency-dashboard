@@ -98,7 +98,7 @@ export const PassengerRow = ({
   }
 
   const titles = type === "Adult"
-    ? ["Mr", "Ms", "Mrs", "Mx"]
+    ? ["Mr", "Ms", "Mrs"]
     : type === "Child"
       ? ["Mr", "Ms"]
       : ["INF"]
@@ -372,6 +372,23 @@ export const usePassengerRows = (initialPassengers = []) => {
     ))
   }
 
+  const ensurePassengerCount = (total, getTypeForIndex) => {
+    setPassengers(prev => {
+      if (prev.length >= total) return prev.slice(0, total)
+      const next = [...prev]
+      while (next.length < total) {
+        const i = next.length
+        const type = getTypeForIndex(i)
+        next.push({
+          id: Date.now() + i,
+          type,
+          title: type === "Adult" ? "Mr" : type === "Child" ? "Master" : "INF"
+        })
+      }
+      return next
+    })
+  }
+
   const removePassenger = (index) => {
     setPassengers(prev => prev.filter((_, i) => i !== index))
   }
@@ -409,6 +426,7 @@ export const usePassengerRows = (initialPassengers = []) => {
     passengers,
     addPassenger,
     updatePassenger,
+    ensurePassengerCount,
     removePassenger,
     validatePassenger,
     isAllValid,

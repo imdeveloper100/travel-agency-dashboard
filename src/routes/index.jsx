@@ -6,6 +6,7 @@ import Tickets from '../pages/Tickets'
 import Login from '../pages/Login'
 import Booking from '../pages/Booking'
 import Confirmation from '../pages/Confirmation'
+import BookingRequest from '../pages/BookingRequest'
 
 /**
  * Centralized Route Configuration
@@ -52,6 +53,10 @@ export const routes = [
       {
         path: 'booking/:ticketId/confirmation',
         element: <Confirmation />,
+      },
+      {
+        path: 'booking-requests',
+        element: <BookingRequest />,
       },
       // Add more routes here as needed
       // Example:

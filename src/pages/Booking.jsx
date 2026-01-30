@@ -7,14 +7,15 @@ import { FlightDetailsCard } from "../components/ui/FlightDetailsCard"
 import { PassengerCounter } from "../components/ui/PassengerCounter"
 import { PassengersTable } from "../components/ui/PassengersTable"
 import { BookingSummary } from "../components/ui/BookingSummary"
-import { Separator } from "../components/ui/Separator"
 import { Button } from "../components/ui/Button"
 import { ArrowLeft, Loader2, Shield, Lock, Users, FileText, AlertCircle } from "lucide-react"
 import { Badge } from "../components/ui/Badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/Tabs"
 import { PassengerRow, usePassengerRows } from "../components/ui/PassenderRow"
+import { useBookingRequests } from "../context/BookingRequestsContext"
 
 export default function Booking() {
+  const { addBooking } = useBookingRequests()
   const { ticketId } = useParams()
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = React.useState(false)
@@ -24,43 +25,27 @@ export default function Booking() {
     child: 0,
     infant: 0
   })
-  const [passengerData, setPassengerData] = React.useState([])
-  const [bookingData, setBookingData] = React.useState(null)
+  const [bookingData] = React.useState(null)
   const [showValidation, setShowValidation] = React.useState(false)
-  
+
   const {
     passengers: passengerRows,
     updatePassenger,
+    ensurePassengerCount,
     isAllValid,
     getValidationErrors
   } = usePassengerRows([])
 
-  // Generate passenger rows when counts change
+  const totalPassengers = passengers.adult + passengers.child + passengers.infant
+
+  // Keep passenger rows in sync with passenger count
   React.useEffect(() => {
-    const totalRows = passengers.adult + passengers.child + passengers.infant
-    const currentRows = passengerRows.length
-    
-    if (totalRows > currentRows) {
-      // Add new rows
-      const rowsToAdd = totalRows - currentRows
-      const newRows = []
-      
-      for (let i = 0; i < rowsToAdd; i++) {
-        const type = 
-          i < passengers.adult ? "Adult" :
-          i < passengers.adult + passengers.child ? "Child" : "Infant"
-        newRows.push({
-          id: Date.now() + i,
-          type,
-          title: type === "Adult" ? "Mr" : type === "Child" ? "Master" : "INF"
-        })
-      }
-      
-      // Update passenger rows
-    } else if (totalRows < currentRows) {
-      // Remove extra rows (keep the logic simple for now)
-    }
-  }, [passengers])
+    if (totalPassengers <= 0) return
+    const getType = (i) =>
+      i < passengers.adult ? "Adult" :
+        i < passengers.adult + passengers.child ? "Child" : "Infant"
+    ensurePassengerCount(totalPassengers, getType)
+  }, [totalPassengers, passengers.adult, passengers.child, passengers.infant])
 
   const handlePassengerChange = (type, count) => {
     setPassengers(prev => ({
@@ -75,7 +60,7 @@ export default function Booking() {
 
   const handleConfirmBooking = async () => {
     setShowValidation(true)
-    
+
     if (!isAllValid()) {
       const errors = getValidationErrors()
       toast.error("Please complete all passenger details", {
@@ -86,28 +71,31 @@ export default function Booking() {
     }
 
     setIsLoading(true)
-    
-    try {
-      // Prepare booking payload
-      const bookingPayload = {
-        ticketId,
-        passengers: passengerRows,
-        totalAmount: passengers.adult * (bookingData?.adultPrice || 0),
-        bookingDate: new Date().toISOString()
-      }
 
-      console.log("Booking payload:", bookingPayload)
+    try {
+      const reference = Math.random().toString(36).substr(2, 8).toUpperCase()
+      const totalAmount = passengers.adult * (bookingData?.adultPrice || 94000)
+      const bookingDate = new Date().toISOString()
+
+      addBooking({
+        reference,
+        ticketId,
+        bookingDate,
+        flightInfo: bookingData?.route || `Flight ${ticketId} • ISB → BAH`,
+        passengerCount: totalPassengers,
+        totalAmount,
+        passengers: passengerRows,
+      })
 
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500))
 
       toast.success("Booking confirmed successfully!", {
-        description: `Booking reference: ${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
+        description: `Booking reference: ${reference}`,
         duration: 5000,
         icon: <FileText className="h-4 w-4" />
       })
 
-      // Navigate to payment or confirmation page
       navigate(`/booking/${ticketId}/confirmation`)
     } catch (error) {
       console.error("Error confirming booking:", error)
@@ -116,9 +104,6 @@ export default function Booking() {
       setIsLoading(false)
     }
   }
-
-  // Calculate total passengers for display
-  const totalPassengers = passengers.adult + passengers.child + passengers.infant
 
   return (
     <div className="container max-w-7xl mx-auto px-4 py-6">
@@ -159,7 +144,7 @@ export default function Booking() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column - Flight Details & Passenger Selection */}
         <div className="lg:col-span-2 space-y-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -209,7 +194,7 @@ export default function Booking() {
                         Max 9 passengers per booking
                       </div>
                     </div>
-                    
+
                     <div className="space-y-4">
                       <PassengerCounter
                         type="Adult"
@@ -219,7 +204,7 @@ export default function Booking() {
                         max={9}
                         description="12 years and above"
                       />
-                      
+
                       <PassengerCounter
                         type="Child"
                         price="N/A"
@@ -228,7 +213,7 @@ export default function Booking() {
                         max={9 - passengers.adult}
                         description="2-11 years"
                       />
-                      
+
                       <PassengerCounter
                         type="Infant"
                         price="Price On Call"
@@ -240,9 +225,9 @@ export default function Booking() {
                     </div>
 
                     {/* Help Information */}
-                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="p-4 bg-blue-50 dark:bg-accent-light/20 rounded-lg border border-accent-light dark:border-accent-light">
                       <div className="flex items-start gap-3">
-                        <div className="text-blue-600 dark:text-blue-400 mt-0.5">
+                        <div className="text-accent-light dark:text-accent-light mt-0.5">
                           💡
                         </div>
                         <div className="text-sm">
@@ -274,26 +259,27 @@ export default function Booking() {
                           </span>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-4">
                         {Array.from({ length: totalPassengers }).map((_, index) => {
-                          const type = 
+                          const type =
                             index < passengers.adult ? "Adult" :
-                            index < passengers.adult + passengers.child ? "Child" : "Infant"
-                          
+                              index < passengers.adult + passengers.child ? "Child" : "Infant"
+
                           return (
                             <PassengerRow
-                              key={index}
+                              key={passengerRows[index]?.id ?? index}
                               index={index}
                               type={type}
+                              initialData={passengerRows[index]}
                               onDataChange={handlePassengerDataChange}
-                              onValidation={() => {}}
+                              onValidation={() => { }}
                               showErrors={showValidation}
                             />
                           )
                         })}
                       </div>
-                      
+
                       <div className="flex justify-end">
                         <Button
                           onClick={() => setActiveTab("review")}
@@ -311,57 +297,20 @@ export default function Booking() {
             </TabsContent>
 
             <TabsContent value="review">
-              {/* Review content will go here */}
+              {/* Booking Passenger Details to be shown in a Table, each passenger will have a row with the following columns: Title, Surname, Given Name, Passport No, Date of Birth, Passport Expiry, Nationality */}
+              <BookingSummary
+                passengerRows={passengerRows}
+                adultCount={passengers.adult}
+                adultPrice={bookingData?.adultPrice || 94000}
+                childCount={passengers.child}
+                childPrice={bookingData?.childPrice || 0}
+                infantCount={passengers.infant}
+                onConfirmBooking={handleConfirmBooking}
+                isLoading={isLoading}
+                isValid={isAllValid()}
+              />
             </TabsContent>
           </Tabs>
-        </div>
-
-        {/* Right Column - Booking Summary */}
-        <div className="space-y-6">
-          <BookingSummary
-            adultCount={passengers.adult}
-            adultPrice={bookingData?.adultPrice || 94000}
-            childCount={passengers.child}
-            childPrice={bookingData?.childPrice || 0}
-            infantCount={passengers.infant}
-            onConfirmBooking={handleConfirmBooking}
-            isLoading={isLoading}
-            isValid={isAllValid()}
-          />
-
-          {/* Additional Information */}
-          <Card>
-            <CardContent className="p-6 space-y-4">
-              <h3 className="font-semibold flex items-center gap-2">
-                <AlertCircle className="h-4 w-4" />
-                Need Help?
-              </h3>
-              <div className="space-y-3">
-                <div className="text-sm">
-                  <div className="font-medium">Customer Support</div>
-                  <div className="text-muted-foreground">+92 300 123 4567</div>
-                </div>
-                <div className="text-sm">
-                  <div className="font-medium">Email Support</div>
-                  <div className="text-muted-foreground">support@flyjinnah.com</div>
-                </div>
-                <div className="text-sm">
-                  <div className="font-medium">Office Hours</div>
-                  <div className="text-muted-foreground">9:00 AM - 11:00 PM (PKT)</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Copyright Footer */}
-          <div className="text-center text-xs text-muted-foreground pt-4 border-t">
-            <div>Copyright © {new Date().getFullYear()} FlyJinnah. All Rights Reserved.</div>
-            <div className="mt-1">
-              <a href="#" className="hover:underline">Terms & Conditions</a> • 
-              <a href="#" className="hover:underline mx-2">Privacy Policy</a> • 
-              <a href="#" className="hover:underline">Refund Policy</a>
-            </div>
-          </div>
         </div>
       </div>
     </div>

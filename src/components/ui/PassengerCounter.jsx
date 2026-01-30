@@ -1,6 +1,5 @@
 // components/ui/PassengerCounter.jsx
 import * as React from "react"
-import { cn } from "@/lib/utils"
 import { Button } from "./Button"
 import { Minus, Plus } from "lucide-react"
 import { Label } from "./Label"
@@ -26,7 +25,7 @@ export const PassengerCounter = ({
   }
 
   return (
-    <div className="flex items-center justify-between p-4 border rounded-lg">
+    <div className="flex items-center justify-between p-4 border border-gray-200 hover:border-accent-light transition-all duration-200 rounded-lg">
       <div className="flex-1">
         <div className="flex items-center gap-3">
           <div className="w-3 h-3 rounded-full bg-primary" />

@@ -26,7 +26,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "./Sidebar"
-import { Ticket } from "lucide-react"
+import { Ticket, ClipboardList } from "lucide-react"
 import { NavMain } from "./NavMain"
 import { NavUser } from "./NavUser"
 
@@ -38,9 +38,20 @@ const data = {
   },
   navMain: [
     {
-      title: "Tickets",
+      title: "Book Tickets",
       url: "/tickets",
       icon: Ticket,
+    },
+    {
+      title: "Bookings",
+      icon: ClipboardList,
+      items: [
+        { title: "All Bookings", url: "/booking-requests" },
+        { title: "All Pending", url: "/booking-requests?status=pending" },
+        { title: "On Hold", url: "/booking-requests?status=on-hold" },
+        { title: "Approved", url: "/booking-requests?status=approved" },
+        { title: "Rejected", url: "/booking-requests?status=rejected" },
+      ],
     },
     {
       title: "Login",
@@ -97,25 +108,28 @@ const data = {
     },
   ],
 }
-    
+
 export function AppSidebar({ ...props }) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
+      <SidebarHeader className="border-b bg-muted/30">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5 hover:bg-transparent"
+              className="!p-3 hover:bg-transparent"
             >
-              <a href="/" className="hover:bg-transparent flex items-center gap-2">
-                <IconInnerShadowTop className="size-5 text-primary" />
-                <span className="text-base font-semibold text-primary">Al Saqib Travels</span>
+              <a href="/" className="flex items-center gap-3">
+                <IconInnerShadowTop className="h-6 w-6 text-primary" />
+                <span className="text-lg font-semibold tracking-tight text-primary">
+                  Al Saqib Travels
+                </span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
         <NavMain items={data.navMain} />
       </SidebarContent>

@@ -1,24 +1,25 @@
 // components/ui/BookingSummary.jsx
 import * as React from "react"
-import { cn } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle } from "./Card"
 import { Separator } from "./Separator"
 import { Badge } from "./Badge"
-import { Calculator, CreditCard, Shield } from "lucide-react"
-import { Button } from "./Button"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./Table"
+import { Calculator, Users } from "lucide-react"
+import PrimaryButton from "./PrimaryButton"
 
-export const BookingSummary = ({ 
+export const BookingSummary = ({
+  passengerRows = [],
   adultCount = 0,
   adultPrice = 94000,
   childCount = 0,
   childPrice = 0,
   infantCount = 0,
   onConfirmBooking,
-  isLoading = false
+  isLoading = false,
+  isValid = true
 }) => {
   const adultTotal = adultCount * adultPrice
   const childTotal = childCount * childPrice
-  const infantTotal = 0 // Price on call
   const total = adultTotal + childTotal
 
   return (
@@ -32,8 +33,48 @@ export const BookingSummary = ({
           </Badge>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-6">
+        {/* Passenger Details Table */}
+        {passengerRows.length >= 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <Users className="h-4 w-4 text-primary" />
+              Passenger Details
+            </div>
+            <div className="rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-accent-light/30 hover:bg-accent-light/20">
+                    <TableHead className="h-10 font-semibold text-foreground">Title</TableHead>
+                    <TableHead className="h-10 font-semibold text-foreground">Surname</TableHead>
+                    <TableHead className="h-10 font-semibold text-foreground">Given Name</TableHead>
+                    <TableHead className="h-10 font-semibold text-foreground">Passport No</TableHead>
+                    <TableHead className="h-10 font-semibold text-foreground">Date of Birth</TableHead>
+                    <TableHead className="h-10 font-semibold text-foreground">Passport Expiry</TableHead>
+                    <TableHead className="h-10 font-semibold text-foreground">Nationality</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {passengerRows.map((p, i) => (
+                    <TableRow key={p.id ?? i} className="hover:bg-primary/5">
+                      <TableCell className="py-3">{p.title || "—"}</TableCell>
+                      <TableCell className="py-3">{p.surname || "—"}</TableCell>
+                      <TableCell className="py-3">{p.givenName || "—"}</TableCell>
+                      <TableCell className="py-3">{p.passportNo || "—"}</TableCell>
+                      <TableCell className="py-3">{p.dateOfBirth || "—"}</TableCell>
+                      <TableCell className="py-3">{p.passportExpiry || "—"}</TableCell>
+                      <TableCell className="py-3">{p.nationality || "—"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )}
+
+        <Separator />
+
         {/* Passengers Summary */}
         <div className="space-y-3">
           <div className="grid grid-cols-4 gap-4 text-sm font-medium">
@@ -41,9 +82,9 @@ export const BookingSummary = ({
             <div className="text-center">Count</div>
             <div className="text-right">Total</div>
           </div>
-          
+
           <Separator />
-          
+
           <div className="space-y-2">
             {adultCount > 0 && (
               <div className="grid grid-cols-4 gap-4 py-2">
@@ -54,7 +95,7 @@ export const BookingSummary = ({
                 </div>
               </div>
             )}
-            
+
             {childCount > 0 && (
               <div className="grid grid-cols-4 gap-4 py-2">
                 <div className="col-span-2">Child</div>
@@ -64,7 +105,7 @@ export const BookingSummary = ({
                 </div>
               </div>
             )}
-            
+
             {infantCount > 0 && (
               <div className="grid grid-cols-4 gap-4 py-2">
                 <div className="col-span-2">Infant</div>
@@ -74,9 +115,9 @@ export const BookingSummary = ({
             )}
           </div>
         </div>
-        
+
         <Separator />
-        
+
         {/* Total */}
         <div className="space-y-2">
           <div className="flex justify-between items-center">
@@ -91,40 +132,14 @@ export const BookingSummary = ({
             </div>
           </div>
         </div>
-        
+
         <Separator />
-        
-        {/* Security Information */}
-        <div className="p-4 bg-muted/30 rounded-lg space-y-3">
-          <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-green-500" />
-            <span className="font-medium">Secure Booking</span>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Your personal and payment information is protected with 256-bit SSL encryption.
-          </p>
-        </div>
-        
-        <Separator />
-        
-        {/* Payment Methods */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">Accepted Payment Methods</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="px-3 py-1 border rounded text-xs">Credit Card</div>
-            <div className="px-3 py-1 border rounded text-xs">Debit Card</div>
-            <div className="px-3 py-1 border rounded text-xs">Bank Transfer</div>
-          </div>
-        </div>
-        
+
         {/* Confirm Button */}
-        <div className="pt-4">
-          <Button
+        <div>
+          <PrimaryButton
             onClick={onConfirmBooking}
-            disabled={isLoading || adultCount === 0}
+            disabled={isLoading || adultCount === 0 || !isValid}
             className="w-full py-6 text-lg"
             size="lg"
           >
@@ -136,7 +151,7 @@ export const BookingSummary = ({
             ) : (
               'Confirm Booking & Proceed to Payment'
             )}
-          </Button>
+          </PrimaryButton>
           <p className="text-xs text-center text-muted-foreground mt-2">
             By confirming, you agree to our Terms & Conditions and Privacy Policy
           </p>

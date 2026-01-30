@@ -91,7 +91,7 @@ export const useTicketForm = () => {
       })
 
       setTimeout(() => {
-        navigate('/dashboard')
+        navigate('../')
       }, 1000)
     } catch (error) {
       console.error('Error creating ticket:', error)

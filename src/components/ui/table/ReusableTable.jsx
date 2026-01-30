@@ -176,13 +176,13 @@ const ReusableTable = React.forwardRef((props, ref) => {
               <div className="relative w-full">
                 <table className="w-full caption-bottom text-sm">
                   {showHeader && (
-                    <TableHeader className="border-b-2 border-accent-dark/50">
+                    <TableHeader className="border-b-2 border-accent-light">
                       {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id} className="border-b-none sticky top-0 z-10 bg-white">
                           {headerGroup.headers.map((header) => (
                             <TableHead
                               key={header.id}
-                              className="whitespace-nowrap font-semibold text-foreground h-11 bg-accent-dark/25"
+                              className="whitespace-nowrap font-semibold text-foreground h-11 bg-accent-light/20"
                               style={{
                                 width: header.getSize(),
                                 minWidth: header.getSize(),
@@ -222,7 +222,7 @@ const ReusableTable = React.forwardRef((props, ref) => {
                           key={row.id}
                           data-state={row.getIsSelected() && 'selected'}
                           className={cn(
-                            "cursor-pointer hover:bg-primary/10 transition-colors",
+                            "cursor-pointer hover:bg-accent-light/10 transition-colors",
                             (onRowClick || onRowDoubleClick) && "hover:text-primary"
                           )}
                           onClick={(e) => handleRowClick(row, e)}
